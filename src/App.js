@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
-    Sun, Moon, Calendar, Plane, Train, Clock, Mic, Send, Bot, User, Menu, X, 
-    CloudSun, Newspaper, TrendingUp, ArrowUpRight, ArrowDownRight 
+    Sun, Moon, Calendar, Plane, Clock, Mic, Send, Bot, User, Menu, X, 
+    CloudSun, Newspaper 
 } from 'lucide-react';
 
 // --- SUB-COMPONENTS (Updated to handle loading states) ---
@@ -108,8 +108,7 @@ export default function App() {
 
   // --- MOCK DATA (for widgets that are still static) ---
   const calendarEvents = [ { time: '10:00 AM', title: 'Team Meeting @ Tidel Park' }, { time: '1:00 PM', title: 'Lunch with Anjali @ Murugan Idli' }, ];
-  const stockData = [ { id: 1, name: 'NIFTY 50', value: '23,557.20', change: '+58.10', percent: '+0.25%' }, { id: 2, name: 'SENSEX', value: '77,337.59', change: '-215.46', percent: '-0.28%' }, ];
-
+  
   // --- EFFECTS ---
   useEffect(() => {
     if (isDarkMode) { document.documentElement.classList.add('dark'); } 
@@ -174,7 +173,6 @@ export default function App() {
             <WeatherWidget data={panelData?.weather} />
             <NewsWidget headlines={panelData?.news} />
             <TravelWidget flights={panelData?.flights} />
-            {/* These widgets below remain static for now */}
             <div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-xl">
               <div className="flex items-center mb-3 text-lg font-semibold"><Calendar className="mr-3 text-purple-500" size={24} /><span>Today's Events</span></div>
               <ul className="space-y-2 text-sm">
