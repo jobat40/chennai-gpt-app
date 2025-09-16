@@ -54,6 +54,7 @@ function TravelTable({ type, data, headers }) {
       default: return 'text-gray-500';
     }
   };
+
   return (
     <div className="mb-3">
       <h4 className="font-bold mb-1">{type}</h4>
@@ -62,10 +63,10 @@ function TravelTable({ type, data, headers }) {
           <tr className="text-left text-gray-500">{headers.map(h => <th key={h} className="pb-1 font-normal">{h}</th>)}</tr>
         </thead>
         <tbody>
-          {data && data.length > 0 ? data.map((item, index) => (
+          {data && data.length > 0 ? data.slice(0, 5).map((item, index) => ( // Use slice(0, 5) to ensure max 5 are shown
             <tr key={index} className="border-t border-gray-200 dark:border-gray-700">
               <td className="py-1">{item.flight}</td>
-              <td className="py-1">{item.from}</td>
+              <td className="py-1">{item.from || item.to}</td>
               <td className="py-1">{item.time}</td>
               <td className={`py-1 font-semibold ${getStatusColor(item.status)}`}>{item.status}</td>
             </tr>
@@ -79,14 +80,31 @@ function TravelTable({ type, data, headers }) {
 }
 
 function TravelWidget({ flights }) {
+  const [activeTab, setActiveTab] = useState('arrivals');
+
   if (!flights) return <LoadingSkeleton className="h-48 p-4" />;
+
   return (
     <div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-xl">
       <div className="flex items-center mb-3 text-lg font-semibold">
-        <Plane className="mr-3 text-blue-500" size={24} /><span>Live Airport Arrivals (MAA)</span>
+        <Plane className="mr-3 text-blue-500" size={24} /><span>Live Airport Status (MAA)</span>
+      </div>
+      {/* --- NEW: TABS FOR ARRIVALS AND DEPARTURES --- */}
+      <div className="flex border-b border-gray-300 dark:border-gray-600 mb-2">
+        <button 
+          onClick={() => setActiveTab('arrivals')} 
+          className={`flex-1 text-center py-2 text-sm font-medium transition-colors ${activeTab === 'arrivals' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500 hover:text-blue-500'}`}>
+          Arrivals
+        </button>
+        <button 
+          onClick={() => setActiveTab('departures')} 
+          className={`flex-1 text-center py-2 text-sm font-medium transition-colors ${activeTab === 'departures' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500 hover:text-blue-500'}`}>
+          Departures
+        </button>
       </div>
       <div className="text-xs">
-        <TravelTable type="Arrivals" data={flights.arrivals} headers={['Flight', 'From', 'Time', 'Status']} />
+        {activeTab === 'arrivals' && <TravelTable type="Arrivals" data={flights.arrivals} headers={['Flight', 'From', 'Time', 'Status']} />}
+        {activeTab === 'departures' && <TravelTable type="Departures" data={flights.departures} headers={['Flight', 'To', 'Time', 'Status']} />}
       </div>
     </div>
   );
@@ -103,8 +121,8 @@ export default function App() {
   const [panelData, setPanelData] = useState(null);
 
   // --- API CONFIGURATION ---
-  const chatApiUrl = 'https://chennai-gpt-api.azurewebsites.net/api/HandleChat';
-  const panelDataApiUrl = 'https://chennai-gpt-api.azurewebsites.net/api/GetPanelData';
+  const chatApiUrl = 'https://chennai-gpt-api-abhkambkefbxgfem.centralindia-01.azurewebsites.net/api/handlechat';
+  const panelDataApiUrl = 'https://chennai-gpt-api-abhkambkefbxgfem.centralindia-01.azurewebsites.net/api/getpaneldata';
 
   // --- MOCK DATA (for widgets that are still static) ---
   const calendarEvents = [ { time: '10:00 AM', title: 'Team Meeting @ Tidel Park' }, { time: '1:00 PM', title: 'Lunch with Anjali @ Murugan Idli' }, ];
