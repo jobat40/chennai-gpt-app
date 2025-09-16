@@ -151,7 +151,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
 
   // --- API CONFIGURATION ---
-  const apiUrl = 'https://chennai-gpt-api.azurewebsites.net/api/HandleChat';
+  const apiUrl = 'https://chennai-gpt-api-abhkambkefbxgfem.centralindia-01.azurewebsites.net/api/HandleChat';
 
   // --- MOCK DATA (for side panel widgets) ---
   const calendarEvents = [
