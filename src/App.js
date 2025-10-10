@@ -15,40 +15,6 @@ if (SpeechRecognition) {
     recognition.maxAlternatives = 1;
 }
 
-// --- A dedicated component to render tables ---
-const TableView = ({ tableData }) => {
-    if (!tableData || !tableData.headers || !tableData.rows || tableData.rows.length === 0) {
-        return <p className="p-4 text-sm italic text-gray-500">The AI returned an empty or invalid table.</p>;
-    }
-
-    return (
-        <div className="overflow-x-auto my-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-700/50">
-                    <tr>
-                        {tableData.headers.map((header, index) => (
-                            <th key={index} scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                                {header}
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {tableData.rows.map((row, rowIndex) => (
-                        <tr key={rowIndex} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            {row.map((cell, cellIndex) => (
-                                <td key={cellIndex} className="px-4 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
-                                    {cell}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-};
-
 // --- Sub-components for Side Panel ---
 const LoadingSkeleton = ({ className }) => <div className={`bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse ${className}`}></div>;
 const WeatherWidget = ({ data }) => { if (!data) return <LoadingSkeleton className="h-28 p-4" />; return <div className="p-4 bg-blue-500 dark:bg-blue-800/60 rounded-xl text-white"> <div className="flex justify-between items-start"> <div><p className="font-semibold">{data.location}</p><p className="text-4xl font-bold">{data.temperature}°C</p><p className="text-blue-100">{data.condition}</p></div><div><CloudSun size={48} className="text-yellow-400" /></div></div></div>; };
@@ -61,7 +27,7 @@ export default function App() {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [messages, setMessages] = useState([
-      { id: 1, sender: 'ai', content: { type: 'text', data: "Vanakkam! I am Chennai-GPT. Ask me a question, or try asking for a list in a table format, like 'List the districts of Tamil Nadu in a table'." } }
+      { id: 1, sender: 'ai', text: "Vanakkam! I am Chennai-GPT. Ask me a question, or try asking for a list in a table format, like 'List the districts of Tamil Nadu in a table'." }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -101,7 +67,7 @@ export default function App() {
         if (messageText === '' || isLoading) return;
 
         setIsLoading(true);
-        const userMessage = { id: Date.now(), sender: 'user', content: { type: 'text', data: messageText } };
+        const userMessage = { id: Date.now(), sender: 'user', text: messageText };
         setMessages(prev => [...prev, userMessage]);
         setInput('');
 
@@ -115,16 +81,17 @@ export default function App() {
             if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
 
             const data = await response.json();
+            // This assumes data.response is always a string
             const aiResponse = { 
                 id: Date.now() + 1, 
-                content: data.response,
+                text: data.response,
                 sender: 'ai', 
                 source: data.source 
             };
             setMessages(prev => [...prev, aiResponse]);
         } catch (error) {
             console.error("Failed to send message:", error);
-            const errorResponse = { id: Date.now() + 1, sender: 'ai', content: { type: 'text', data: "Sorry, I'm having trouble connecting. Please try again." } };
+            const errorResponse = { id: Date.now() + 1, sender: 'ai', text: "Sorry, I'm having trouble connecting. Please try again." };
             setMessages(prev => [...prev, errorResponse]);
         } finally {
             setIsLoading(false);
@@ -169,16 +136,8 @@ export default function App() {
                         {messages.map(msg => (
                             <div key={msg.id} className={`flex items-start gap-4 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
                                 {msg.sender === 'ai' && (<div className="group relative w-10 h-10 flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white"><Bot size={24} />{msg.source && (<div className="absolute -bottom-2 -right-2 bg-white dark:bg-gray-700 rounded-full p-0.5 shadow-md">{msg.source === 'KNOWLEDGE_BASE' ? <Database size={14} className="text-blue-500" /> : <BrainCircuit size={14} className="text-purple-500" />}</div>)}</div>)}
-                                <div className={`max-w-lg rounded-2xl ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white dark:bg-gray-800 rounded-bl-none'}`}>
-                                    {msg.sender === 'user' ? (
-                                        <p className="p-4">{msg.content.data}</p>
-                                    ) : (
-                                        msg.content && msg.content.type === 'table' ? (
-                                            <TableView tableData={msg.content.data} />
-                                        ) : (
-                                            <p className="p-4">{msg.content ? msg.content.data : '...'}</p>
-                                        )
-                                    )}
+                                <div className={`max-w-lg p-4 rounded-2xl ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white dark:bg-gray-800 rounded-bl-none'}`}>
+                                    <p>{msg.text}</p>
                                 </div>
                                 {msg.sender === 'user' && (<div className="w-10 h-10 flex-shrink-0 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center"><User size={24} /></div>)}
                             </div>
