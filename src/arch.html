@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Architecture Diagram - Chennai-GPT (Refined)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .arch-node {
+            transition: all 0.2s ease-in-out;
+            cursor: default;
+        }
+        .arch-node:hover, .arch-node.selected {
+            transform: scale(1.03);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            border-color: #f59e0b; /* Amber 500 */
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            color: #9ca3af; /* Gray 400 */
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+    <header class="bg-white shadow-sm sticky top-0 z-20">
+        <div class="container mx-auto px-6 py-4">
+            <h1 class="text-3xl font-bold text-slate-800">Chennai-GPT: Final Application Architecture</h1>
+            <p class="text-slate-600 mt-1">This diagram visualizes the complete data flow. Hover over any component to see its description.</p>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-6 py-8 flex flex-col xl:flex-row gap-8">
+        <!-- Diagram Area -->
+        <div class="w-full xl:w-2/3">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                <!-- Column 1: User Facing -->
+                <div class="flex flex-col gap-8 text-center p-2">
+                    <div class="arch-node bg-green-100 border-2 border-green-400 text-green-800 rounded-lg p-4" data-title="User" data-description="The end-user interacting with the application via a web browser on their phone or desktop. They can upload documents, chat with the AI, and view the live dashboard.">
+                        <span class="text-4xl">👤</span>
+                        <h3 class="font-bold mt-2">User</h3>
+                    </div>
+                    <div class="arch-node bg-blue-100 border-2 border-blue-400 text-blue-800 rounded-lg p-4" data-title="React Frontend (Azure Static Web App)" data-description="The modern user interface built with React. It is hosted on Azure Static Web Apps for global speed, security, and automated deployments from GitHub. It makes API calls to the backend functions.">
+                        <span class="text-4xl">🖥️</span>
+                        <h3 class="font-bold mt-2">React Frontend</h3>
+                        <p class="text-xs">(Static Web App)</p>
+                    </div>
+                </div>
+
+                <!-- Column 2: Backend Logic -->
+                <div class="flex flex-col gap-4 text-center p-2">
+                    <div class="arch-node bg-purple-100 border-2 border-purple-400 text-purple-800 rounded-lg p-4 h-32" data-title="GetPanelData Function" data-description="A lightweight Azure Function that fetches live data (weather, news, flights) from external APIs for the side panel dashboard.">
+                        <span class="text-4xl">⚙️</span>
+                        <h3 class="font-bold mt-2">Panel Data API</h3>
+                    </div>
+                    <div class="arch-node bg-purple-100 border-2 border-purple-400 text-purple-800 rounded-lg p-4 h-48" data-title="HandleChat Function (The AI Agent)" data-description="The main 'brain' of the application. This Azure Function receives user queries, performs hybrid RAG searches, synthesizes answers with Google Gemini, and saves conversations to Cosmos DB.">
+                        <span class="text-4xl">🧠</span>
+                        <h3 class="font-bold mt-2">Chat Agent API</h3>
+                    </div>
+                    <div class="arch-node bg-purple-100 border-2 border-purple-400 text-purple-800 rounded-lg p-4 h-32" data-title="ProcessDocument Function" data-description="A trigger-based Azure Function that acts as the 'refinery'. It automatically processes any uploaded file, extracts text using Document Intelligence, chunks it, and saves it as structured JSON.">
+                        <span class="text-4xl">⚙️</span>
+                        <h3 class="font-bold mt-2">Doc Processor API</h3>
+                    </div>
+                </div>
+
+                <!-- Column 3: Data & Knowledge Base -->
+                <div class="flex flex-col gap-4 text-center p-2">
+                     <div class="arch-node bg-gray-100 border-2 border-gray-400 text-gray-800 rounded-lg p-4 h-32" data-title="External APIs" data-description="Third-party APIs for weather, news, and flights that provide the live, real-time data for the application's side panel dashboard.">
+                        <span class="text-4xl">🛰️</span>
+                        <h3 class="font-bold mt-2">External APIs</h3>
+                    </div>
+                    <div class="arch-node bg-blue-100 border-2 border-blue-400 text-blue-800 rounded-lg p-4 h-48" data-title="Azure AI Search (The Library)" data-description="The core of the RAG system. It includes the Indexer, Skillset, and the final searchable Index that holds the text chunks, their vector embeddings, and filterable metadata.">
+                        <span class="text-4xl">📚</span>
+                        <h3 class="font-bold mt-2">AI Search</h3>
+                        <p class="text-xs">(Indexer, Skillset, Index)</p>
+                    </div>
+                     <div class="arch-node bg-orange-100 border-2 border-orange-400 text-orange-800 rounded-lg p-4 h-32" data-title="Blob Storage (Processed Zone)" data-description="The 'clean' container that stores the structured JSON output from the ProcessDocument function, ready for indexing. This is the official source for the AI Search Indexer.">
+                        <span class="text-4xl">🗃️</span>
+                        <h3 class="font-bold mt-2">Processed Storage</h3>
+                    </div>
+                </div>
+
+                <!-- Column 4: External AI & Raw Storage -->
+                <div class="flex flex-col gap-4 text-center p-2">
+                    <div class="arch-node bg-red-100 border-2 border-red-400 text-red-800 rounded-lg p-4 h-32" data-title="Google Gemini 1.5 Pro" data-description="The core Large Language Model. The HandleChat function sends it the user query and RAG context to synthesize the final, intelligent answer.">
+                        <span class="text-4xl">✨</span>
+                        <h3 class="font-bold mt-2">Google Gemini</h3>
+                    </div>
+                     <div class="arch-node bg-blue-100 border-2 border-blue-400 text-blue-800 rounded-lg p-4 h-48" data-title="Azure OpenAI (Embeddings)" data-description="This service is called by the AI Search Skillset during indexing. It provides the text-embedding-ada-002 model to convert text chunks into vector embeddings.">
+                        <span class="text-4xl">🔗</span>
+                        <h3 class="font-bold mt-2">Azure OpenAI</h3>
+                        <p class="text-xs">(Embeddings)</p>
+                    </div>
+                    <div class="arch-node bg-orange-100 border-2 border-orange-400 text-orange-800 rounded-lg p-4 h-32" data-title="Blob Storage (Landing Zone)" data-description="The 'inbox' container where any raw file (.pdf, .xlsx, .csv) is uploaded to start the processing pipeline.">
+                        <span class="text-4xl">📥</span>
+                        <h3 class="font-bold mt-2">Landing Storage</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description Panel -->
+        <div class="w-full xl:w-1/3">
+            <div id="description-panel" class="bg-white rounded-xl shadow-lg border border-slate-200 p-6 sticky top-24">
+                <h2 id="desc-title" class="text-2xl font-bold text-blue-600 mb-2">Component Details</h2>
+                <p id="desc-content" class="text-slate-700 min-h-[100px]">Hover over a component in the diagram to learn about its role in the application. The diagram shows four main stages: User Facing, Backend Logic, Data & Knowledge, and External AI & Raw Storage.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const descTitle = document.getElementById('desc-title');
+            const descContent = document.getElementById('desc-content');
+            let selectedNode = null;
+
+            document.querySelectorAll('.arch-node').forEach(node => {
+                node.addEventListener('mouseover', () => {
+                    if (selectedNode) {
+                        selectedNode.classList.remove('selected');
+                    }
+                    node.classList.add('selected');
+                    selectedNode = node;
+                    descTitle.textContent = node.dataset.title;
+                    descContent.textContent = node.dataset.description;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
