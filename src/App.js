@@ -129,7 +129,7 @@ export default function App() {
         } finally {
             setIsLoading(false);
         }
-    }, [input, isLoading, messages, chatApiUrl]);
+    }, [input, isLoading, chatApiUrl]);
 
     useEffect(() => { 
         if (!recognition) return; 
