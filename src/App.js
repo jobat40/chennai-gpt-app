@@ -53,7 +53,72 @@ const TableView = ({ tableData }) => {
 const LoadingSkeleton = ({ className }) => <div className={`bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse ${className}`}></div>;
 const WeatherWidget = ({ data }) => { if (!data) return <LoadingSkeleton className="h-28 p-4" />; return <div className="p-4 bg-blue-500 dark:bg-blue-800/60 rounded-xl text-white"> <div className="flex justify-between items-start"> <div><p className="font-semibold">{data.location}</p><p className="text-4xl font-bold">{data.temperature}°C</p><p className="text-blue-100">{data.condition}</p></div><div><CloudSun size={48} className="text-yellow-400" /></div></div></div>; };
 const NewsWidget = ({ headlines }) => { if (!headlines || headlines.length === 0) return <LoadingSkeleton className="h-36 p-4" />; return <div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-xl"><div className="flex items-center mb-3 text-lg font-semibold"><Newspaper className="mr-3 text-red-500" size={24} /><span>Local Headlines</span></div><ul className="space-y-3 text-sm">{headlines.map(item => (<li key={item.id}><p className="font-medium text-gray-800 dark:text-gray-200 leading-tight">{item.title}</p><p className="text-xs text-gray-500 dark:text-gray-400">{item.source}</p></li>))}</ul></div>; };
-const TravelWidget = ({ flights }) => { if (!flights) return <LoadingSkeleton className="h-48 p-4" />; return <div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-xl"><div className="flex items-center mb-3 text-lg font-semibold"><Plane className="mr-3 text-blue-500" size={24} /><span>Live Airport Arrivals (MAA)</span></div>{/* Table rendering logic would go here */}</div>;};
+
+function TravelTable({ type, data, headers }) {
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'landed': case 'arrived': case 'on-time': return 'text-green-500';
+      case 'delayed': return 'text-orange-500';
+      case 'scheduled': case 'active': return 'text-blue-500';
+      default: return 'text-gray-500';
+    }
+  };
+
+  return (
+    <div className="mb-3">
+      <h4 className="font-bold mb-1">{type}</h4>
+      <table className="w-full">
+        <thead>
+          <tr className="text-left text-gray-500">{headers.map(h => <th key={h} className="pb-1 font-normal">{h}</th>)}</tr>
+        </thead>
+        <tbody>
+          {data && data.length > 0 ? data.slice(0, 5).map((item, index) => ( // Use slice(0, 5) to ensure max 5 are shown
+            <tr key={index} className="border-t border-gray-200 dark:border-gray-700">
+              <td className="py-1">{item.flight}</td>
+              <td className="py-1">{item.from || item.to}</td>
+              <td className="py-1">{item.time}</td>
+              <td className={`py-1 font-semibold ${getStatusColor(item.status)}`}>{item.status}</td>
+            </tr>
+          )) : (
+            <tr><td colSpan={headers.length} className="py-2 text-center text-gray-500">No data available.</td></tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+
+const TravelWidget = ({ flights }) => {
+  const [activeTab, setActiveTab] = useState('arrivals');
+
+  if (!flights) return <LoadingSkeleton className="h-48 p-4" />;
+
+  return (
+    <div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-xl">
+      <div className="flex items-center mb-3 text-lg font-semibold">
+        <Plane className="mr-3 text-blue-500" size={24} /><span>Live Airport Status (MAA)</span>
+      </div>
+      {/* --- NEW: TABS FOR ARRIVALS AND DEPARTURES --- */}
+      <div className="flex border-b border-gray-300 dark:border-gray-600 mb-2">
+        <button 
+          onClick={() => setActiveTab('arrivals')} 
+          className={`flex-1 text-center py-2 text-sm font-medium transition-colors ${activeTab === 'arrivals' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500 hover:text-blue-500'}`}>
+          Arrivals
+        </button>
+        <button 
+          onClick={() => setActiveTab('departures')} 
+          className={`flex-1 text-center py-2 text-sm font-medium transition-colors ${activeTab === 'departures' ? 'border-b-2 border-blue-500 text-blue-500' : 'text-gray-500 hover:text-blue-500'}`}>
+          Departures
+        </button>
+      </div>
+      <div className="text-xs">
+        {activeTab === 'arrivals' && <TravelTable type="Arrivals" data={flights.arrivals} headers={['Flight', 'From', 'Time', 'Status']} />}
+        {activeTab === 'departures' && <TravelTable type="Departures" data={flights.departures} headers={['Flight', 'To', 'Time', 'Status']} />}
+      </div>
+    </div>
+  );
+};
 
 // --- Main App Component ---
 export default function App() {
