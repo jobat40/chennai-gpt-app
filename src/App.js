@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
     Sun, Moon, Calendar, Plane, Clock, Mic, Send, Bot, User, Menu, X,
-    CloudSun, Newspaper, Database, BrainCircuit
+    CloudSun, Newspaper, Database, BrainCircuit, ThumbsUp, ThumbsDown, Copy, Check
 } from 'lucide-react';
 
 // --- Speech Recognition Setup ---
