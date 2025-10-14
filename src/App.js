@@ -133,7 +133,8 @@ export default function App() {
     const [panelData, setPanelData] = useState(null);
     const [isListening, setIsListening] = useState(false);
     const [micError, setMicError] = useState(null);
-
+    const [copiedMessageId, setCopiedMessageId] = useState(null);
+    
     // --- API Configuration ---
     const chatApiUrl = 'https://chennai-gpt-api-abhkambkefbxgfem.centralindia-01.azurewebsites.net/api/handlechat';
     const panelDataApiUrl = 'https://chennai-gpt-api-abhkambkefbxgfem.centralindia-01.azurewebsites.net/api/getpaneldata';
