@@ -222,6 +222,37 @@ export default function App() {
     const handleMicClick = () => { if (!recognition) { setMicError("Sorry, your browser does not support voice input."); return; } if (isListening) { recognition.stop(); } else { navigator.mediaDevices.getUserMedia({ audio: true }).then(() => { setMicError(null); setIsListening(true); recognition.start(); }).catch(err => { setMicError("Microphone permission is required."); }); } };
     const handleKeyPress = (e) => { if (e.key === 'Enter') { handleSendMessage(input); } };
 
+    const handleFeedback = (messageId, feedbackType) => {
+        setMessages(prevMessages =>
+            prevMessages.map(msg => {
+                if (msg.id === messageId) {
+                    return { ...msg, feedback: msg.feedback === feedbackType ? null : feedbackType };
+                }
+                return msg;
+            })
+        );
+        // In a real app, you would log this feedback to a service.
+    };
+
+    const handleCopy = (messageId, content) => {
+        const textToCopy = content.type === 'table' 
+            ? [content.data.headers.join('\t'), ...content.data.rows.map(row => row.join('\t'))].join('\n')
+            : content.data;
+            
+        const textArea = document.createElement('textarea');
+        textArea.value = textToCopy;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            setCopiedMessageId(messageId);
+            setTimeout(() => setCopiedMessageId(null), 2000); // Reset after 2 seconds
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+        document.body.removeChild(textArea);
+    };
+
     // --- RENDER ---
     return (
         <div className={`flex h-screen font-sans bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200`}>
@@ -235,22 +266,38 @@ export default function App() {
             <main className="flex-1 flex flex-col h-screen">
                 <header className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700"><button onClick={() => setIsSidebarOpen(true)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 lg:hidden"><Menu size={24} /></button><div className="font-semibold text-lg invisible lg:visible">AI Chat</div><button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">{isDarkMode ? <Sun size={24} /> : <Moon size={24} />}</button></header>
                 <div className="flex-1 overflow-y-auto p-6">
-                    <div className="max-w-3xl mx-auto space-y-6">
+                    <div className="max-w-3xl mx-auto space-y-4">
                         {messages.map(msg => (
-                            <div key={msg.id} className={`flex items-start gap-4 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
-                                {msg.sender === 'ai' && (<div className="group relative w-10 h-10 flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white"><Bot size={24} />{msg.source && (<div className="absolute -bottom-2 -right-2 bg-white dark:bg-gray-700 rounded-full p-0.5 shadow-md">{msg.source.startsWith('KNOWLEDGE') ? <Database size={14} className="text-blue-500" /> : <BrainCircuit size={14} className="text-purple-500" />}</div>)}</div>)}
-                                <div className={`max-w-lg rounded-2xl ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white dark:bg-gray-800 rounded-bl-none'}`}>
-                                    {msg.sender === 'user' ? (
-                                        <p className="p-4">{msg.content.data}</p>
-                                    ) : (
-                                        msg.content && msg.content.type === 'table' ? (
-                                            <TableView tableData={msg.content.data} />
+                            <div key={msg.id}>
+                                <div className={`flex items-start gap-4 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
+                                    {msg.sender === 'ai' && (<div className="group relative w-10 h-10 flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white"><Bot size={24} />{msg.source && (<div className="absolute -bottom-2 -right-2 bg-white dark:bg-gray-700 rounded-full p-0.5 shadow-md">{msg.source.startsWith('KNOWLEDGE') ? <Database size={14} className="text-blue-500" /> : <BrainCircuit size={14} className="text-purple-500" />}</div>)}</div>)}
+                                    <div className={`max-w-lg rounded-2xl ${msg.sender === 'user' ? 'bg-blue-600 text-white rounded-br-none' : 'bg-white dark:bg-gray-800 rounded-bl-none'}`}>
+                                        {msg.sender === 'user' ? (
+                                            <p className="p-4">{msg.content.data}</p>
                                         ) : (
-                                            <p className="p-4">{msg.content ? msg.content.data : '...'}</p>
-                                        )
-                                    )}
+                                            msg.content && msg.content.type === 'table' ? (
+                                                <TableView tableData={msg.content.data} />
+                                            ) : (
+                                                <p className="p-4">{msg.content ? msg.content.data : '...'}</p>
+                                            )
+                                        )}
+                                    </div>
+                                    {msg.sender === 'user' && (<div className="w-10 h-10 flex-shrink-0 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center"><User size={24} /></div>)}
                                 </div>
-                                {msg.sender === 'user' && (<div className="w-10 h-10 flex-shrink-0 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center"><User size={24} /></div>)}
+                                {/* --- NEW: Action Toolbar for AI messages --- */}
+                                {msg.sender === 'ai' && msg.content && !isLoading && (
+                                    <div className="flex items-center gap-2 mt-2 ml-14">
+                                        <button onClick={() => handleFeedback(msg.id, 'liked')} className={`p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ${msg.feedback === 'liked' ? 'text-green-500' : 'text-gray-400'}`}>
+                                            <ThumbsUp size={16} className={msg.feedback === 'liked' ? 'fill-current' : ''} />
+                                        </button>
+                                        <button onClick={() => handleFeedback(msg.id, 'disliked')} className={`p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ${msg.feedback === 'disliked' ? 'text-red-500' : 'text-gray-400'}`}>
+                                            <ThumbsDown size={16} className={msg.feedback === 'disliked' ? 'fill-current' : ''} />
+                                        </button>
+                                        <button onClick={() => handleCopy(msg.id, msg.content)} className="p-1.5 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400">
+                                            {copiedMessageId === msg.id ? <Check size={16} className="text-green-500" /> : <Copy size={16} />}
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         ))}
                         {isLoading && (<div className="flex items-start gap-4 animate-pulse"><div className="w-10 h-10 flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white"><Bot size={24} /></div><div className="max-w-lg p-4 rounded-2xl bg-white dark:bg-gray-800 rounded-bl-none"><p className="italic text-gray-500">Thinking...</p></div></div>)}
