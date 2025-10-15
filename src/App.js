@@ -126,7 +126,7 @@ export default function App() {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [messages, setMessages] = useState([
-      { id: 1, sender: 'ai', content: { type: 'text', data: "Vanakkam! I am Chennai-GPT. Ask me a question, or try asking for a list in a table format, like 'List the districts of Tamil Nadu in a table'." } }
+      { id: 1, sender: 'ai', content: { type: 'text', data: "Hola! I am GPT. How can I help you today?" } }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -259,7 +259,7 @@ export default function App() {
         <div className={`flex h-screen font-sans bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200`}>
             {/* --- SIDE PANEL --- */}
             <aside className={`fixed top-0 left-0 z-20 h-full w-80 bg-white dark:bg-gray-800/70 backdrop-blur-sm border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:relative lg:translate-x-0`}>
-                <div className="p-4 h-full overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-blue-600 dark:text-blue-400">Chennai-GPT</h2><button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><X size={20} /></button></div><div className="space-y-6"><WeatherWidget data={panelData?.weather} /><NewsWidget headlines={panelData?.news} /><TravelWidget flights={panelData?.flights} /><div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-xl"><div className="flex items-center mb-3 text-lg font-semibold"><Calendar className="mr-3 text-purple-500" size={24} /><span>Today's Events</span></div><ul className="space-y-2 text-sm">{calendarEvents.map(event => (<li key={event.title} className="flex items-start"><Clock size={14} className="mr-2 mt-1 text-gray-500" /><div><span className="font-medium">{event.time}</span><p className="text-gray-600 dark:text-gray-400">{event.title}</p></div></li>))}</ul></div></div></div>
+                <div className="p-4 h-full overflow-y-auto"><div className="flex justify-between items-center mb-6"><h2 className="text-2xl font-bold text-blue-600 dark:text-blue-400">Pod-GPT</h2><button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><X size={20} /></button></div><div className="space-y-6"><WeatherWidget data={panelData?.weather} /><NewsWidget headlines={panelData?.news} /><TravelWidget flights={panelData?.flights} /><div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-xl"><div className="flex items-center mb-3 text-lg font-semibold"><Calendar className="mr-3 text-purple-500" size={24} /><span>Today's Events</span></div><ul className="space-y-2 text-sm">{calendarEvents.map(event => (<li key={event.title} className="flex items-start"><Clock size={14} className="mr-2 mt-1 text-gray-500" /><div><span className="font-medium">{event.time}</span><p className="text-gray-600 dark:text-gray-400">{event.title}</p></div></li>))}</ul></div></div></div>
             </aside>
             {isSidebarOpen && <div onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black/30 z-10 lg:hidden"></div>}
             
